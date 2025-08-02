@@ -1,0 +1,176 @@
+{
+  "name": "1-Trigger_Manually_for_All_Mails",
+  "nodes": [
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "e562bf75-54e0-47d1-8024-2224421d12bb",
+      "name": "SplitInBatches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        580,
+        280
+      ],
+      "webhookId": "string",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "maxTries": 0,
+      "waitBetweenTries": 0,
+      "notesInFlow": true,
+      "notes": "string"
+    },
+    {
+      "parameters": {},
+      "id": "195820f9-ca3f-4d35-b5ca-883bb19e6871",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        60,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 2,
+        "simple": false,
+        "filters": {
+          "readStatus": "both"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "=attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "dd5e224a-5b7d-422f-8315-3217aba1edcc",
+      "name": "GET All Mail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        280
+      ],
+      "webhookId": "44926b89-b799-4b62-91c7-3c5e92a5b3a5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "id",
+          "name": "Gmail onurbolaca"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": "workflowId_id",
+        "options": {}
+      },
+      "id": "b0e49e4d-92ec-4a9b-b7eb-99bf3dd0b2d4",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        880,
+        460
+      ],
+      "webhookId": "string",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "maxTries": 0,
+      "waitBetweenTries": 0,
+      "notesInFlow": true,
+      "onError": "continueRegularOutput",
+      "notes": "string"
+    },
+    {
+      "parameters": {
+        "content": "Processes all the mails in the mail address.\n\nBefore running workflow:Gmail Credential information must be entered.\n\nTo run it: Execute Workflow must be run for it to work.\n\nOutput: One by one mails are sent to Subworkflow for processing.",
+        "height": 262
+      },
+      "id": "c5a0ef77-d5ec-4ce8-83be-b1791690fde5",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "SplitInBatches": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "GET All Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET All Mail": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b7cbcb75-6af1-48d8-a3e9-1201b4f0fb6b",
+  "meta": {
+    "instanceId": "3f46a89b20d98240740ab85f607ec2aed2074848b346a943bb43533d838eb777"
+  },
+  "id": "08CiR3T4i32Rw5Mh",
+  "tags": [
+    {
+      "createdAt": "2025-01-02T09:26:04.994Z",
+      "updatedAt": "2025-01-02T09:26:04.994Z",
+      "id": "01NXEbQovpuP31dk",
+      "name": "🔸 Main"
+    },
+    {
+      "createdAt": "2025-01-02T09:26:05.024Z",
+      "updatedAt": "2025-01-02T09:26:05.024Z",
+      "id": "SPCxG6LItXCBWvkz",
+      "name": "🧑🏻 onurbolaca"
+    }
+  ]
+}

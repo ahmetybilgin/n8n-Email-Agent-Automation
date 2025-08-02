@@ -1,0 +1,600 @@
+{
+  "name": "3- Extract_Mails",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "58c6501c-e6f9-44a0-bb96-6f8878315add",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3400,
+        800
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a15e9cf1-f0e0-442b-b2d9-0bf9ee097e98",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Save All Metadata\n",
+        "height": 80,
+        "width": 150
+      },
+      "id": "741aeeb3-ed49-478a-8c95-6cfd4b9f1ce8",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2600,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "bucket: {{AWS_BUCKET_NAME}}\nfolder: email_address / mail_name@gmail.com\nfile: mailID_file-name/123_test.pdf",
+        "height": 156,
+        "width": 395
+      },
+      "id": "139e0feb-dfda-4245-83dd-bc73911d50c9",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3640,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Sender Identification\nSubject Line Keywords\nBody Keywords\nBinary Attachment Detection\nFile Details",
+        "height": 112.03782627904334,
+        "width": 231.53608699041945
+      },
+      "id": "6e3fe759-3b3b-46f5-82c8-2dd0589f7618",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        780,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Control Parameters\n\n\n\n\n\n\n\n\n\n\n\n\n-Sender Identification\n-Subject Line Keywords\n-Body Keywords\n-Binary Attachment Detection\n-File Details",
+        "height": 295.9687300347904,
+        "width": 271.6895423437109
+      },
+      "id": "81a9ab70-50b8-43f1-8dec-2d4d9d4230e2",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "The mail received for processing enters the flow and is processed. \n\nBefore running workflow: Make sure that Gmail, Sheet, AWS S3, Mongodb credentials are active.\n\nTo run it: It is triggered when the mail arrives in the flow.\n\nOutput: The mail is metadata saved or passed.\n\n-",
+        "height": 400.23838010681436,
+        "width": 467.7120634896523
+      },
+      "id": "173a9690-0b96-4d86-aa62-0713fb1ed5c4",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all();"
+      },
+      "id": "1585c422-edf2-417d-b21b-bfb51f0f2bb4",
+      "name": "Return One Mail Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        440
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retrieve each item from the 'items' array\nconst items = $('Return One Mail Data').all();\n\n// Get the JSON data coming from the 'Extracting URL' node\nconst links = $(\"Extract URL\").all();\n\n// Merge all 'json' objects from 'links' into a single JSON object\nlet mergedJson = {};\nlinks.forEach((data, index) => {\n  // Create a unique key name for each 'url' (e.g., 'url1', 'url2', ...)\n  const uniqueKey = `url${index + 1}`; // Adding 1 since index starts from 0\n  mergedJson[uniqueKey] = data.json.url; // Add the URL to the 'mergedJson' object\n});\n\n// Create a new array by adding the merged 'mergedJson' object as 'links' to each item in 'items'\nconst updatedItems = items.map(item => {\n  item.json.links = mergedJson; // Adding 'mergedJson' object as 'links' to each item\n  return item; // Return the updated item\n});\n\n// Return the updated 'items' array\nreturn updatedItems;"
+      },
+      "id": "96659dc8-bacf-4e1c-a822-77bc327b0b93",
+      "name": "Map Data for MongoDB",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2360,
+        420
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "941f2968-1d0a-4c52-8173-a82ba8874c64",
+      "name": "Aggregate to One Item",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2060,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let results = [];\nconst data = $('Return One Mail Data').all();\n\nfor (const item of data) {\n\n    for (key of Object.keys(item.binary)) {\n        results.push({\n            json: {\n                fileName: item.binary[key].fileName\n            },\n            binary: {\n                data: item.binary[key],\n            }\n        });\n    }\n}\nreturn results;"
+      },
+      "id": "7020f4ac-194d-4361-b6bf-7d5c3dbb6eea",
+      "name": "Return File Name and Binary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3340,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "{{AWS_BUCKET_NAME}}",
+        "fileName": "={{ $('Return One Mail Data').item.json[\"headers\"][\"delivered-to\"].split('Delivered-To: ')[1]}}/{{ $('Return One Mail Data').item.json[\"id\"] }}_{{ $json[\"fileName\"] }} ",
+        "additionalFields": {}
+      },
+      "id": "5fd236bb-1c88-48c2-9b47-095f22b29b59",
+      "name": "Upload Data to AWS S3 Bucket",
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        3660,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "0dbb72a8-79ca-45b8-bbef-c7d9992d9afc",
+              "leftValue": "={{ $('Return One Mail Data').item.binary.attachment_0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "bc271e0a-c91f-4122-9fae-75b5ade73b1d",
+      "name": "If Attachment Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        420
+      ],
+      "notesInFlow": true,
+      "alwaysOutputData": false,
+      "notes": "string"
+    },
+    {
+      "parameters": {
+        "content": "Google Sheet Parameters",
+        "height": 80,
+        "width": 208.04069237002824
+      },
+      "id": "bd0c808b-72b3-43f2-b164-9185bb11b3cb",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "content": "It processes the data of a single mail and reads the data to avoid renaming changes in the flow.",
+        "height": 103.12867308314468,
+        "width": 262.54358904812284
+      },
+      "id": "38a0d3a4-fb76-41c4-a9ef-55bc063f38ac",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        500,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Reduces the flow to one for a single item continuation",
+        "height": 87.6853144482237
+      },
+      "id": "51fe79ba-405c-418e-94a9-a7257fae931c",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "51bc1cbe-2e01-474f-aed1-013aeb262fb8",
+      "name": "Aggregate to One Item1",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assuming 'inputData' contains the text in which we want to detect URLs\nconst inputData = $node[\"Return One Mail Data\"].json[\"text\"];\n\n// Check if inputData is not undefined or null\nif (!inputData) {\n  throw new Error(\"Input data is undefined or null. Cannot read properties of undefined.\");\n}\n\n// Regex pattern to match only website URLs (http, https, with or without WWW)\nconst urlRegex = /https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)/g;\n\n// Use the match method to find all URLs in the inputData\n// 'match' will return an array of all URLs found or null if no URL is found\nconst urls = inputData.match(urlRegex);\n\n// Initialize an array to collect detected URLs\nlet detectedUrls = [];\n\n// Check if any URL was found\nif (urls) {\n  // If URLs are found, add each URL to the detectedUrls array\n  detectedUrls = urls;\n}\n\n// Create the result object with the hasURL flag and the detected URLs\nconst result = {\n  hasURL: detectedUrls.length > 0,\n  detect_url: detectedUrls\n};\n\n// Return the result object wrapped in an array to comply with n8n output structure\nreturn [{ json: result }];\n"
+      },
+      "id": "fae4024e-2d5c-47be-a61d-1f334b851aaf",
+      "name": "Extract URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        440
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "0dbb72a8-79ca-45b8-bbef-c7d9992d9afc",
+              "leftValue": "={{ $(\"Return One Mail Data\").item.json[\"from\"][\"value\"][\"0\"][\"address\"] }}",
+              "rightValue": "={{ $('Get Mail Extract Conditions').item.json['Sender Identification'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "aea02f89-42a5-49e0-9adf-e1ad0af9fa9e",
+              "leftValue": "={{ $('Return One Mail Data').item.json[\"subject\"].toLowerCase() }}",
+              "rightValue": "={{ $('Get Mail Extract Conditions').item.json['Subject Line Keywords'].toLowerCase() }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "52fd16bc-e920-4260-8c0a-f47d0783427f",
+              "leftValue": "={{ $('Return One Mail Data').item.json[\"text\"].toLowerCase() }}",
+              "rightValue": "={{ $('Get Mail Extract Conditions').item.json['Body Keywords'].toLowerCase() }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0f4cedf2-6e94-4558-b8e9-1e515dbc762e",
+              "leftValue": "={{ $('Detect Attachments').item.json[\"hasAttachment\"] }}",
+              "rightValue": "={{ $('Get Mail Extract Conditions').item.json['Binary Attachment Detection'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "5723d429-878e-4840-a899-fb60f16afff1",
+              "leftValue": "={{ $('Return One Mail Data').item.binary}}",
+              "rightValue": "={{ $('Get Mail Extract Conditions').item.json['File Details'].toLowerCase() }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true,
+          "looseTypeValidation": true
+        }
+      },
+      "id": "0540ea89-cfae-4dfd-a622-359a4cdc9b35",
+      "name": "Check Params",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1740,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let results = []; // Initialize an array to store the results\n\n// Assuming 'data' variable represents the output of a node, e.g., 'Return One Mail Data'\n// You might need to adjust this line according to your specific context or data source\nconst data = $('Return One Mail Data').all(); // This line should be adapted to your context\n\nfor (const item of data) {\n    // Initialize a flag to track the presence of attachments\n    let hasAttachment = false; // Default assumption is that there is no attachment\n\n    // Check if the 'binary' property exists and has at least one key (attachment)\n    if (item.binary && Object.keys(item.binary).length > 0) {\n        hasAttachment = true; // If there's at least one binary data, set hasAttachment to true\n    }\n\n    // Push the result for each item into the results array\n    results.push({\n        json: {\n            hasAttachment: hasAttachment // Include the attachment presence information\n        }\n    });\n}\n\nreturn results; // Return the results array"
+      },
+      "id": "914ae7d2-39b8-4909-a623-bd9417e941d5",
+      "name": "Detect Attachments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "id": "3e702c73-496b-4d64-8b2a-ff4d14667eb8",
+      "name": "Get Mail Extract Conditions",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "findOneAndUpdate",
+        "collection": "{{MONGODB_COLLECTION_NAME}}",
+        "fields": "=id, threadId, labelIds, sizeEstimate, headers, html, text, textAsHtml, subject, date, to, from, messageId, links",
+        "upsert": true,
+        "options": {}
+      },
+      "id": "eed749ec-8769-4f23-a1ef-cf8ba27d2b83",
+      "name": "Upsert Data to MongoDB",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e49705db-3281-4254-8bc6-c14e77f17bb4",
+      "name": "Execute Workflow Trigger Extract Mails",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        280,
+        440
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Return One Mail Data": {
+      "main": [
+        [
+          {
+            "node": "Extract URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Data for MongoDB": {
+      "main": [
+        [
+          {
+            "node": "Upsert Data to MongoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate to One Item": {
+      "main": [
+        [
+          {
+            "node": "Map Data for MongoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return File Name and Binary": {
+      "main": [
+        [
+          {
+            "node": "Upload Data to AWS S3 Bucket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Data to AWS S3 Bucket": {
+      "main": [
+        [
+          {
+            "node": "Aggregate to One Item1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Attachment Exists": {
+      "main": [
+        [
+          {
+            "node": "Return File Name and Binary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract URL": {
+      "main": [
+        [
+          {
+            "node": "Detect Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Params": {
+      "main": [
+        [
+          {
+            "node": "Aggregate to One Item",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Attachments": {
+      "main": [
+        [
+          {
+            "node": "Get Mail Extract Conditions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Mail Extract Conditions": {
+      "main": [
+        [
+          {
+            "node": "Check Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Data to MongoDB": {
+      "main": [
+        [
+          {
+            "node": "If Attachment Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger Extract Mails": {
+      "main": [
+        [
+          {
+            "node": "Return One Mail Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e4060841-7470-4ecb-8b19-c17a906fdd6a",
+  "meta": {
+    "instanceId": "48722655ea4bedd02050bff99cd1c434d21d85608bb298f661783b628a72e049"
+  },
+  "id": "ppMteRVDyYETyl0u",
+  "tags": [
+    {
+      "name": "🔻 Subflow",
+      "id": "qOX6Yl3qvRExbpsp",
+      "createdAt": "2025-02-12T05:44:52.078Z",
+      "updatedAt": "2025-02-12T05:44:52.078Z"
+    },
+    {
+      "name": "🧑🏻 onurbolaca",
+      "id": "qCQQkxRF8qnN9W6r",
+      "createdAt": "2025-02-12T05:44:52.099Z",
+      "updatedAt": "2025-02-12T05:44:52.099Z"
+    }
+  ]
+}

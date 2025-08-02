@@ -1,0 +1,276 @@
+{
+  "name": "2-Trigger_on_New_Mail",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": "D9HwkycBSltwrXgu",
+        "mode": "each",
+        "options": {}
+      },
+      "id": "c81bcfed-fa93-4980-97a1-d96cf40a9586",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        280
+      ],
+      "webhookId": "string",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "maxTries": 0,
+      "waitBetweenTries": 0,
+      "notesInFlow": true,
+      "notes": "string"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "927469e3-4985-48c1-a2e5-f2df85bcd6e1",
+      "name": "SplitInBatches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        200
+      ],
+      "webhookId": "string",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "maxTries": 0,
+      "waitBetweenTries": 0,
+      "notesInFlow": true,
+      "notes": "string"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "readStatus": "both"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "90277aee-1ec8-4fef-9df1-08b63b08f793",
+      "name": "Gmail Trigger Account-4",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        20
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "readStatus": "both"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "e9e6d9f6-02f0-4bdb-8d65-18e9f15dd2c4",
+      "name": "Gmail Trigger  Account-3",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        200
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "readStatus": "both"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "775862f9-f98c-4b4b-ad25-68f66b140706",
+      "name": "Gmail Trigger Account-2",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        400
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "readStatus": "both"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "83222336-0933-4721-91bf-3351f7d91dd5",
+      "name": "Gmail Trigger Account-1",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        620
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "id_1",
+          "name": "Gmail onurbolaca"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Listens and transfers all new incoming mails. \n\nBefore running workflow: Gmail Credential information must be entered.\n\nTo run it:  Works when there is a new incoming mail.\n\nOutput:  Process on the subworkflow switches to the process flow.\n\n",
+        "height": 187,
+        "width": 405
+      },
+      "id": "cbd19f67-d026-498a-8aeb-c65629469969",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -540,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger Account-4": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger  Account-3": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger Account-2": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger Account-1": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "32faa392-c0b5-4c24-a70a-3380724b13b9",
+  "meta": {
+    "instanceId": "3f46a89b20d98240740ab85f607ec2aed2074848b346a943bb43533d838eb777"
+  },
+  "id": "nk5xxgzyff4NHifr",
+  "tags": [
+    {
+      "createdAt": "2025-01-02T09:26:04.994Z",
+      "updatedAt": "2025-01-02T09:26:04.994Z",
+      "id": "01NXEbQovpuP31dk",
+      "name": "🔸 Main"
+    },
+    {
+      "createdAt": "2025-01-02T09:26:05.024Z",
+      "updatedAt": "2025-01-02T09:26:05.024Z",
+      "id": "SPCxG6LItXCBWvkz",
+      "name": "🧑🏻 onurbolaca"
+    }
+  ]
+}
